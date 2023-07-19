@@ -1,0 +1,102 @@
+<!DOCTYPE html>  
+<html lang="zh-cn">  
+<head>  
+   <meta charset="UTF-8">  
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+   <title>石头剪刀布游戏</title>  
+   <style>  
+       body {  
+           font-family: Arial, sans-serif;  
+           display: flex;  
+           justify-content: center;  
+           align-items: center;  
+           height: 100vh;  
+           background-color: #f0f0f0;  
+       }  
+       .game {  
+           display: flex;  
+           flex-direction: column;  
+           align-items: center;  
+           background-color: white;  
+           padding: 20px;  
+           border-radius: 4px;  
+           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  
+       }  
+       h1 {  
+           margin-top: 0;  
+           text-align: center;  
+       }  
+       button {  
+           margin: 20px;  
+           padding: 10px 20px;  
+           font-size: 16px;  
+           cursor: pointer;  
+       }  
+       button:hover {  
+           background-color: #e0e0e0;  
+       }  
+   </style>  
+</head>  
+<body>  
+   <div class="game">  
+       <h1>石头剪刀布游戏</h1>  
+       <p>用户选择：<span id="user-choice">未选择</span></p>  
+       <p>电脑选择：<span id="computer-choice">未选择</span></p>  
+       <button id="rock-btn">石头</button>  
+       <button id="scissors-btn">剪刀</button>  
+       <button id="paper-btn">布</button>  
+       <button id="start-btn" disabled>开始</button>  
+   </div>
+   <script>  
+       const rockBtn = document.getElementById('rock-btn');  
+       const scissorsBtn = document.getElementById('scissors-btn');  
+       const paperBtn = document.getElementById('paper-btn');  
+       const startBtn = document.getElementById('start-btn');  
+       const userChoice = document.getElementById('user-choice');  
+       const computerChoice = document.getElementById('computer-choice');
+       let userSelection = null;  
+       let computerSelection = null;
+       rockBtn.addEventListener('click', () => {  
+           userSelection = 'rock';  
+           userChoice.textContent = '石头';  
+           startBtn.disabled = false;  
+       });
+       scissorsBtn.addEventListener('click', () => {  
+           userSelection = 'scissors';  
+           userChoice.textContent = '剪刀';  
+           startBtn.disabled = false;  
+       });
+       paperBtn.addEventListener('click', () => {  
+           userSelection = 'paper';  
+           userChoice.textContent = '布';  
+           startBtn.disabled = false;  
+       });
+       startBtn.addEventListener('click', () => {  
+           const computerSelection = Math.random() < 0.5 ? 'rock' : (Math.random() < 0.33 ? 'scissors' : 'paper');  
+			
+			if(computerSelection == 'rock')
+				computerSelection2 = '石头';
+
+			if(computerSelection == 'paper')
+				computerSelection2 = '布';
+
+			if(computerSelection == 'scissors')
+				computerSelection2 = '剪刀';				
+
+           computerChoice.textContent = computerSelection;
+           if (userSelection === computerSelection) {  
+               userChoice.textContent = '平局';  
+           } else if (userSelection === 'rock' && computerSelection === 'scissors') {  
+               userChoice.textContent = '用户胜利';  
+           } else if (userSelection === 'scissors' && computerSelection === 'paper') {  
+               userChoice.textContent = '用户胜利';  
+           } else if (userSelection === 'paper' && computerSelection === 'rock') {  
+               userChoice.textContent = '用户胜利';  
+           }
+           startBtn.disabled = true;  
+
+		    computerChoice.textContent = computerSelection2;
+       });  
+   </script>  
+</body>  
+</html>  

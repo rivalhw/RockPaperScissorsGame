@@ -1,52 +1,436 @@
-<!DOCTYPE html>  
-<html lang="zh-cn">  
-<head>  
-   <meta charset="UTF-8">  
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-   <title>石头剪刀布游戏</title>  
-   <style>  
-       body {  
-           font-family: Arial, sans-serif;  
-           display: flex;  
-           justify-content: center;  
-           align-items: center;  
-           height: 100vh;  
-           background-color: #f0f0f0;  
-       }  
-       .game {  
-           display: flex;  
-           flex-direction: column;  
-           align-items: center;  
-           background-color: white;  
-           padding: 20px;  
-           border-radius: 4px;  
-           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  
-       }  
-       h1 {  
-           margin-top: 0;  
-           text-align: center;  
-       }  
-       button {  
-           margin: 20px;  
-           padding: 10px 20px;  
-           font-size: 16px;  
-           cursor: pointer;  
-       }  
-       button:hover {  
-           background-color: #e0e0e0;  
-       }  
-   </style>  
-</head>  
-<body>  
-   <div class="game">  
-       <h1>石头剪刀布游戏</h1>  
-       <p>用户选择：<span id="user-choice">未选择</span></p>  
-       <p>电脑选择：<span id="computer-choice">未选择</span></p>  
-       <button id="rock-btn">石头</button>  
-       <button id="scissors-btn">剪刀</button>  
-       <button id="paper-btn">布</button>  
-       <button id="start-btn" disabled>开始</button>  
-   </div>
- <script src="./RockPaperScissorsGame.js"></script>
-</body>  
-</html>  
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石头剪刀布游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 顶部工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .sound-toggle {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sound-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .sound-toggle.muted {
+            background: #ddd;
+            opacity: 0.6;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+
+        /* 计分板 */
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .score-box {
+            flex: 1;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .score-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .score-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .score-box.user .score-value {
+            color: #667eea;
+        }
+
+        .score-box.computer .score-value {
+            color: #764ba2;
+        }
+
+        /* 对战区域 */
+        .battle-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+            min-height: 120px;
+        }
+
+        .choice-display {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .choice-display.active {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .vs {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #999;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* 结果区域 */
+        .result-area {
+            text-align: center;
+            min-height: 60px;
+            margin: 20px 0;
+        }
+
+        .result-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 15px 30px;
+            border-radius: 12px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .result-text.win {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: white;
+            animation: bounce 0.5s ease;
+        }
+
+        .result-text.lose {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            color: white;
+            animation: shake 0.5s ease;
+        }
+
+        .result-text.draw {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* 选择提示 */
+        .choice-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* 按钮区域 */
+        .buttons-area {
+            margin-top: 30px;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .choice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .choice-btn {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            border: 3px solid transparent;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            cursor: pointer;
+            font-size: 2.5em;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .choice-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #764ba2;
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .choice-btn span {
+            font-size: 0.4em;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .action-btn {
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .start-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #666;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            transform: translateY(-3px);
+        }
+
+        /* 动画效果 */
+        .thinking {
+            animation: thinking 0.5s ease infinite alternate;
+        }
+
+        @keyframes thinking {
+            from { transform: rotate(-10deg); }
+            to { transform: rotate(10deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .choice-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 2em;
+            }
+
+            .choice-display {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5em;
+            }
+
+            .battle-area {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <button class="sound-toggle" id="sound-toggle" title="开关音效">
+                🔊
+            </button>
+        </div>
+
+        <h1>✊ ✌️ ✋</h1>
+        <p class="subtitle">石头剪刀布大作战</p>
+
+        <!-- 计分板 -->
+        <div class="score-board">
+            <div class="score-box user">
+                <div class="score-label">👤 玩家</div>
+                <div class="score-value" id="user-score">0</div>
+            </div>
+            <div class="score-box computer">
+                <div class="score-label">🤖 电脑</div>
+                <div class="score-value" id="computer-score">0</div>
+            </div>
+        </div>
+
+        <!-- 对战区域 -->
+        <div class="battle-area">
+            <div class="choice-display" id="user-display">❓</div>
+            <div class="vs">VS</div>
+            <div class="choice-display" id="computer-display">❓</div>
+        </div>
+
+        <!-- 结果区域 -->
+        <div class="result-area">
+            <div class="result-text" id="result-text" style="display: none;"></div>
+        </div>
+
+        <!-- 选择提示 -->
+        <div class="choice-info">
+            <span id="user-choice-text">等待选择...</span>
+            <span id="computer-choice-text">等待中...</span>
+        </div>
+
+        <!-- 按钮区域 -->
+        <div class="buttons-area">
+            <p class="section-title">选择你的出招</p>
+            <div class="choice-buttons">
+                <button class="choice-btn" data-choice="rock">
+                    ✊
+                    <span>石头</span>
+                </button>
+                <button class="choice-btn" data-choice="scissors">
+                    ✌️
+                    <span>剪刀</span>
+                </button>
+                <button class="choice-btn" data-choice="paper">
+                    ✋
+                    <span>布</span>
+                </button>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn start-btn" id="start-btn" disabled>开始对决</button>
+                <button class="action-btn reset-btn" id="reset-btn">重置</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./RockPaperScissorsGame.js"></script>
+</body>
+</html>
